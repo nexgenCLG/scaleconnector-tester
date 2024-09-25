@@ -27,10 +27,9 @@ export const useScaleStore = defineStore("scale", () => {
     scaleWS.value?.addEventListener("open", () => {
       console.log('start scale');
       
-      startScale(scaleName).then(() => {
-        
-        setScaleWS();
-      })
+      setScaleWS();
+      startScale(scaleName);
+
     })
   }
 
@@ -63,14 +62,14 @@ export const useScaleStore = defineStore("scale", () => {
     scaleWS.value?.send(JSON.stringify({
       message: 'startScale',
       // value: { path: 'COM5', baudRate: 2400, dataBits: 7, stopBits: 1, parity: 'even' },
-      value: scaleConfig,
+      data: scaleConfig,
     }))
   }
   
   async function stopScale() {
     scaleWS.value?.send(JSON.stringify({
       message: 'stopScale',
-      value: null,
+      data: null,
     }))
   }
   
@@ -86,7 +85,7 @@ export const useScaleStore = defineStore("scale", () => {
 
     scaleWS.value?.send(JSON.stringify({
       message: 'scaleWeight',
-      value: null,
+      data: null,
     }))
     setScaleWS();
   }
