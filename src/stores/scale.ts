@@ -6,12 +6,8 @@ export const useScaleStore = defineStore("scale", () => {
   const weightFromScale = ref(0);
   const infoFromScale = ref('');
 
-
   const scaleWS: Ref<WebSocket|null> = ref(null);
   
-  // const ws: Ref<WebSocket|null> = ref(null)
-
-
   async function connectToScaleConnector(paramURL: string, scaleName: string) {
     const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiaW9zdHJlYW1lciJ9.oNx-4e9hldyATpdPZghd_sjX8DhTkQFVDBxIhKh4MC4"
 
@@ -21,24 +17,22 @@ export const useScaleStore = defineStore("scale", () => {
     url += '?token=' + token;
     console.log('SC URL: ', url)
 
-    scaleWS.value = new (WebSocket as any)(url);
-    // scaleWS.value = new (WebSocket as any)('ws://172.18.2.249:8081?token=' + token);
-    
-    scaleWS.value?.addEventListener("open", () => {
-      console.log('open connection with SC');
-    })
+    try {
+      scaleWS.value = new (WebSocket as any)(url);
+      // scaleWS.value = new (WebSocket as any)('ws://172.18.2.249:8081?token=' + token);
+      
+      scaleWS.value?.addEventListener("open", () => {
+        console.log('open connection with SC');
+      }) 
 
-    // if (scaleWS.value?.readyState === WebSocket.OPEN){
-    //   console.log('opened');
-    // }
+      await setScaleWS();
+      await startScale(scaleName);
 
-    await setScaleWS();
-    await startScale(scaleName);
+    } catch(err: any) {
+      console.log(err)
+      infoFromScale.value = 'Connection error:' + err;
+    }
 
-    // scaleWS.value?.send(JSON.stringify({
-    //   message: 'test',
-    //   data: 'data',
-    // }))
   }
 
 
@@ -68,6 +62,7 @@ export const useScaleStore = defineStore("scale", () => {
   }
   
   async function startScale(scaleConfig: any) {
+    console.log('start scale');
     scaleWS.value?.send(JSON.stringify({
       message: 'startScale',
       // value: { path: 'COM5', baudRate: 2400, dataBits: 7, stopBits: 1, parity: 'even' },
