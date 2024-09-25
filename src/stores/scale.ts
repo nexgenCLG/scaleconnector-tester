@@ -25,16 +25,25 @@ export const useScaleStore = defineStore("scale", () => {
     // scaleWS.value = new (WebSocket as any)('ws://172.18.2.249:8081?token=' + token);
     
     scaleWS.value?.addEventListener("open", () => {
-      console.log('start scale');
-      
-      setScaleWS();
-      startScale(scaleName);
-
+      console.log('open connection with SC');
     })
+
+    // if (scaleWS.value?.readyState === WebSocket.OPEN){
+    //   console.log('opened');
+    // }
+
+    await setScaleWS();
+    await startScale(scaleName);
+
+    // scaleWS.value?.send(JSON.stringify({
+    //   message: 'test',
+    //   data: 'data',
+    // }))
   }
 
-  function setScaleWS() {
 
+  async function setScaleWS() {
+    console.log('set scale WS');
     if (scaleWS.value == null) return;
 
     // scaleWS.value = ws;
@@ -87,7 +96,6 @@ export const useScaleStore = defineStore("scale", () => {
       message: 'scaleWeight',
       data: null,
     }))
-    setScaleWS();
   }
 
   // setInterval(getWeight, 5000);

@@ -29,7 +29,13 @@ npm run dev
 ### Type-Check, Compile and Minify for Production
 
 ```sh
-npm run build
+npm run build npm run deploy
+```
+
+### Update the github page
+
+```sh
+npm run deploy
 ```
 
 ### Lint with [ESLint](https://eslint.org/)
