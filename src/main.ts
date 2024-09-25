@@ -1,4 +1,4 @@
-import { IonicVue, alertController } from '@ionic/vue';
+import { IonicVue } from '@ionic/vue';
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import router from './router'

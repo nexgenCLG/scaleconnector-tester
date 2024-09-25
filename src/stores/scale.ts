@@ -2,21 +2,32 @@ import { ref, type Ref } from "vue";
 import { defineStore } from "pinia";
 
 export const useScaleStore = defineStore("scale", () => {
+  
   const weightFromScale = ref(0);
+  const infoFromScale = ref('');
+
+
   const scaleWS: Ref<WebSocket|null> = ref(null);
   
   // const ws: Ref<WebSocket|null> = ref(null)
 
 
-  async function connectToScaleConnector() {
+  async function connectToScaleConnector(paramURL: string, scaleName: string) {
     const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiaW9zdHJlYW1lciJ9.oNx-4e9hldyATpdPZghd_sjX8DhTkQFVDBxIhKh4MC4"
-    scaleWS.value = new (WebSocket as any)('ws://localhost:8081?token=' + token);
+
+    let url ='ws://';
+    console.log('SC URL: ', paramURL)
+    paramURL ? url += paramURL : url += 'localhost:8081';
+    url += '?token=' + token;
+    console.log('SC URL: ', url)
+
+    scaleWS.value = new (WebSocket as any)(url);
     // scaleWS.value = new (WebSocket as any)('ws://172.18.2.249:8081?token=' + token);
     
     scaleWS.value?.addEventListener("open", () => {
       console.log('start scale');
       
-      startScale(null).then(() => {
+      startScale(scaleName).then(() => {
         
         setScaleWS();
       })
@@ -31,11 +42,15 @@ export const useScaleStore = defineStore("scale", () => {
     scaleWS.value!.addEventListener("message", (message: any) => {
       try {
         const response = JSON.parse(message.data);
+
+        if(response.message == 'status' || response.message == 'auth') {      
+          console.log('status from scale connector: ', response.data);
+          infoFromScale.value = response.data;
+        }
+
         if(response.message == 'scaleWeight') {      
           console.log('new weight: ', response.data);
           weightFromScale.value = response.data;
-
-          console.log('new weightFromScale: ', weightFromScale.value);
         }
       } catch {() => {
         console.log('setScaleWS errror...');
@@ -47,7 +62,8 @@ export const useScaleStore = defineStore("scale", () => {
   async function startScale(scaleConfig: any) {
     scaleWS.value?.send(JSON.stringify({
       message: 'startScale',
-      value: { path: 'COM5', baudRate: 2400, dataBits: 7, stopBits: 1, parity: 'even' },
+      // value: { path: 'COM5', baudRate: 2400, dataBits: 7, stopBits: 1, parity: 'even' },
+      value: scaleConfig,
     }))
   }
   
@@ -58,13 +74,12 @@ export const useScaleStore = defineStore("scale", () => {
     }))
   }
   
-
-
   function disconnectFromScaleConnector() {
     console.log('stop scale');
     stopScale();
     scaleWS.value?.close();
     scaleWS.value = null;
+    infoFromScale.value = 'disconnected'
   }
 
   async function getWeight() {
@@ -82,5 +97,8 @@ export const useScaleStore = defineStore("scale", () => {
     weightFromScale.value = newWeight;
   }
 
-  return { weightFromScale, startScale, stopScale, setScaleWS, getWeight, connectToScaleConnector, disconnectFromScaleConnector };
+  return { 
+    weightFromScale, infoFromScale, 
+    startScale, stopScale, setScaleWS, getWeight, connectToScaleConnector, disconnectFromScaleConnector 
+  };
 });
