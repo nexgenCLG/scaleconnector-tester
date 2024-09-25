@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting...</title>
+  <script type="text/javascript">
+    // Redirect any 404 page to the root
+    var currentLocation = window.location.pathname;
+    var redirectUrl = '/' + window.location.hash.replace(/^#/, '');
+    if (!redirectUrl) {
+      redirectUrl = '/';
+    }
+    window.location.replace(redirectUrl);
+  </script>
+</head>
+<body>
+</body>
+</html>
