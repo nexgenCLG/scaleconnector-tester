@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { IonApp, IonCol, IonItem, IonLabel, IonGrid, IonRow, IonButton, IonContent, IonInput } from '@ionic/vue';
+  import { IonApp, IonCol, IonItem, IonLabel, IonGrid, IonRow, IonButton, IonContent, IonInput, IonTextarea } from '@ionic/vue';
   import { ref, type Ref} from "vue";
   import { storeToRefs } from 'pinia';
 
@@ -8,12 +8,11 @@
 
   const { connectToScaleConnector, disconnectFromScaleConnector, getWeight } = useScaleStore();
 
-  const url: Ref<string> = ref('localhost:8081');
-  const scaleName: Ref<string> = ref('');
+  const url: Ref<string> = ref('localhost:8082');
   const seconds: Ref<number> = ref(5);
 
   function startScaleConnection() {
-    connectToScaleConnector(url.value, scaleName.value.trim());
+    connectToScaleConnector(url.value);
   }
 
   function stopScaleConnection() {
@@ -71,18 +70,13 @@
        </ion-row>
        <ion-row class="full-height">
         <ion-col size="3">
-          <ion-input label="Scale Connector URL (IP:port)" v-model="url" label-placement="stacked"></ion-input>
+          <ion-input label="Scale Connector URL (IP:port)" v-model="url" label-placement="stacked" fill="outline"></ion-input>
         </ion-col>
-        <ion-col size="3">
-          <ion-input label="Scale name (PB8000 / empty)" v-model="scaleName" label-placement="stacked"></ion-input>
-        </ion-col>
-        <ion-col size="2">
+        <ion-col size="1">
           <ion-button @click="startScaleConnection">Start</ion-button> 
         </ion-col>
-        <ion-col size="2">
-          <ion-item>
-            <ion-label>{{ infoFromScale }}</ion-label>
-          </ion-item>
+        <ion-col size="4">
+          <ion-textarea label="Status:" v-model="infoFromScale" label-placement="stacked" fill="outline"></ion-textarea>
         </ion-col>
       </ion-row>
       <ion-row class="full-height">
@@ -91,18 +85,17 @@
         </ion-col>
        </ion-row>
        <ion-row class="full-height">
-        <ion-col size="3">
+        <ion-col size="2">
           <ion-button @click="getManyWeightFromScale">Get weight (loop)</ion-button> 
         </ion-col>
-        <ion-col size="2">
-          <ion-input label="Seconds" v-model="seconds" label-placement="stacked"></ion-input>
+        <ion-col size="1">
+          <ion-input label="Seconds" v-model="seconds" label-placement="stacked" fill="outline"></ion-input>
+        </ion-col>
+        <ion-col  size="2">
+          <ion-input label="RECEIVED weight:" v-model="weightFromScale" label-placement="stacked" fill="outline"></ion-input>
         </ion-col>
        </ion-row>
        <ion-row class="full-height">
-        <ion-col>
-          <ion-label>RECEIVED weight: </ion-label>
-          <ion-label>{{ weightFromScale }}</ion-label>
-        </ion-col>
        </ion-row>
        <ion-row class="full-height">
         <ion-col>

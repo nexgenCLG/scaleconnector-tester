@@ -8,7 +8,7 @@ export const useScaleStore = defineStore("scale", () => {
 
   const scaleWS: Ref<WebSocket|null> = ref(null);
   
-  async function connectToScaleConnector(paramURL: string, scaleName: string) {
+  async function connectToScaleConnector(paramURL: string) {
     const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiaW9zdHJlYW1lciJ9.oNx-4e9hldyATpdPZghd_sjX8DhTkQFVDBxIhKh4MC4"
 
     let url ='ws://';
@@ -26,7 +26,7 @@ export const useScaleStore = defineStore("scale", () => {
       }) 
 
       await setScaleWS();
-      await startScale(scaleName);
+      await startScale();
 
     } catch(err: any) {
       console.log(err)
@@ -61,12 +61,11 @@ export const useScaleStore = defineStore("scale", () => {
     })
   }
   
-  async function startScale(scaleConfig: any) {
+  async function startScale() {
     console.log('start scale');
     scaleWS.value?.send(JSON.stringify({
       message: 'startScale',
-      // value: { path: 'COM5', baudRate: 2400, dataBits: 7, stopBits: 1, parity: 'even' },
-      data: scaleConfig,
+      data: null,
     }))
   }
   
