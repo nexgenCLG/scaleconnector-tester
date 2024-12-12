@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 export const useScaleStore = defineStore("scale", () => {
   
   const weightFromScale = ref(0);
-  const infoFromScale = ref('');
+  const infoFromScale = ref(''); //← or →
 
   const scaleWS: Ref<WebSocket|null> = ref(null);
   
@@ -16,6 +16,7 @@ export const useScaleStore = defineStore("scale", () => {
     paramURL ? url += paramURL : url += 'localhost:8081';
     url += '?token=' + token;
     console.log('SC URL: ', url)
+    infoFromScale.value += '\nSC URL: ', url;
 
     try {
       scaleWS.value = new (WebSocket as any)(url);
@@ -30,7 +31,7 @@ export const useScaleStore = defineStore("scale", () => {
 
     } catch(err: any) {
       console.log(err)
-      infoFromScale.value = 'Connection error:' + err;
+      infoFromScale.value += '\n ← Connection error:' + err;
     }
 
   }
@@ -44,10 +45,10 @@ export const useScaleStore = defineStore("scale", () => {
     scaleWS.value!.addEventListener("message", (message: any) => {
       try {
         const response = JSON.parse(message.data);
+        infoFromScale.value += "\n ← " + message.data;
 
         if(response.message == 'status' || response.message == 'auth') {      
-          console.log('status from scale connector: ', response.data);
-          infoFromScale.value = response.data;
+          // infoFromScale.value += response.data;
         }
 
         if(response.message == 'scaleWeight') {      
@@ -81,15 +82,61 @@ export const useScaleStore = defineStore("scale", () => {
     stopScale();
     scaleWS.value?.close();
     scaleWS.value = null;
-    infoFromScale.value = 'disconnected'
+    infoFromScale.value += '\n ← disconnected'
   }
 
   async function getWeight() {
 
-    scaleWS.value?.send(JSON.stringify({
+    const data: any = JSON.stringify({
       message: 'scaleWeight',
       data: null,
-    }))
+    }); 
+
+    scaleWS.value?.send(data)
+    infoFromScale.value += '\n → ' + data;
+  }
+
+  async function sendTara() {
+
+    const data: any = JSON.stringify({
+      message: 'sendTara',
+      data: null,
+    }); 
+
+    scaleWS.value?.send(data)
+    infoFromScale.value += '\n → ' + data;
+  }
+
+  async function sendHandTara(value: number) {
+
+    const data: any = JSON.stringify({
+      message: 'sendHandTara',
+      data: value,
+    }); 
+
+    scaleWS.value?.send(data)
+    infoFromScale.value += '\n → ' + data;
+  }
+
+  async function sendZero() {
+
+    const data: any = JSON.stringify({
+      message: 'sendZero',
+      data: null,
+    }); 
+
+    scaleWS.value?.send(data)
+    infoFromScale.value += '\n → ' + data;
+  }
+
+  async function sendBrutto() {
+
+    const data: any = JSON.stringify({
+      message: 'sendBrutto',
+      data: null,
+    }); 
+    scaleWS.value?.send(data);
+    infoFromScale.value += '\n → ' + data;
   }
 
   // setInterval(getWeight, 5000);
@@ -100,6 +147,8 @@ export const useScaleStore = defineStore("scale", () => {
 
   return { 
     weightFromScale, infoFromScale, 
-    startScale, stopScale, setScaleWS, getWeight, connectToScaleConnector, disconnectFromScaleConnector 
+    startScale, stopScale, setScaleWS, getWeight, 
+    sendTara, sendHandTara, sendZero, sendBrutto,
+    connectToScaleConnector, disconnectFromScaleConnector 
   };
 });
