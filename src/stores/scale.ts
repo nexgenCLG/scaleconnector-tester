@@ -36,6 +36,18 @@ export const useScaleStore = defineStore("scale", () => {
 
   }
 
+  async function sendConfigToScaleConnector(scaleName: string, scaleConfig: string) {
+    console.log('sendConfigToScaleConnector', scaleName, scaleConfig);
+    
+    const data: any = JSON.stringify({
+      message: 'configScale',
+      data: {name: scaleName, config: scaleConfig},
+    }); 
+
+    scaleWS.value?.send(data)
+    infoFromScale.value += '\n → ' + data;
+  }
+
 
   async function setScaleWS() {
     console.log('set scale WS');
@@ -149,6 +161,6 @@ export const useScaleStore = defineStore("scale", () => {
     weightFromScale, infoFromScale, 
     startScale, stopScale, setScaleWS, getWeight, 
     sendTara, sendHandTara, sendZero, sendBrutto,
-    connectToScaleConnector, disconnectFromScaleConnector 
+    connectToScaleConnector, disconnectFromScaleConnector, sendConfigToScaleConnector
   };
 });
