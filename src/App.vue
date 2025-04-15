@@ -6,6 +6,9 @@
   import { useScaleStore } from "@/stores/scale";
   const { weightFromScale, infoFromScale } = storeToRefs(useScaleStore());
 
+  import { usePrintingStore } from '@/stores/printing';
+  const { saveAsPDF } = usePrintingStore();
+
   const { connectToScaleConnector, disconnectFromScaleConnector, sendConfigToScaleConnector, getWeight, sendTara, sendHandTara, sendBrutto, sendZero } = useScaleStore();
 
   const url: Ref<string> = ref('localhost:8081');
@@ -14,7 +17,7 @@
   const seconds: Ref<number> = ref(5);
   const tara: Ref<number> = ref(0);
 
-
+  const urlPrinting: Ref<string> = ref('localhost:3000');
 
   function startScaleConnection() {
     connectToScaleConnector(url.value);
@@ -58,6 +61,18 @@
       intervalId = null;
       weightFromScale.value = 0;
     }
+  }
+
+  function sendPDF() {
+    const popoverContent = document.getElementById('printContent')!.outerHTML;
+    const fileName = 'Test.pdf';
+    
+    saveAsPDF(fileName, popoverContent, urlPrinting.value).then(() => {
+      console.log("PDF saved successfully.");
+    }).catch((errorCode) => {
+      alert(errorCode.includes('CREATE') ? 'Error creating file: ' + errorCode.message : 'Error sending file: ' + errorCode.message);
+    });
+
   }
 
 </script>
@@ -131,13 +146,12 @@
               <ion-col>
                 <ion-button @click="sendZero">Send Zero</ion-button>
               </ion-col>
-            </ion-row>
-            <ion-row class="full-height">
               <ion-col>
                 <ion-button @click="sendBrutto">Send Brutto</ion-button>
               </ion-col>
             </ion-row>
-
+            <ion-row class="full-height">
+            </ion-row>
           </ion-col>
           <ion-col size="6" style="max-width: 600px;">
             <ion-row class="full-height">
@@ -146,6 +160,22 @@
               </ion-col>
             </ion-row>
           </ion-col>
+        </ion-row>
+        <br/><hr/>
+        <ion-row class="full-height">
+          <ion-col  size="4">
+            <ion-label><h1> Automatic printing</h1></ion-label>
+          </ion-col>
+          <ion-col  size="4">
+            <ion-input label="Printing service (IP:port)" v-model="urlPrinting" label-placement="stacked" fill="outline"></ion-input>
+          </ion-col>
+          <ion-col >
+            <ion-button @click="sendPDF">Send PDF</ion-button>
+          </ion-col>
+          <ion-col size="3"></ion-col>
+        </ion-row>
+        <ion-row id="printContent">
+          <ion-label>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</ion-label>
         </ion-row>
       </ion-grid>
     </ion-content>
