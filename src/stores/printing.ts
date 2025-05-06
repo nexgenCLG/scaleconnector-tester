@@ -100,7 +100,7 @@ export const usePrintingStore = defineStore("printing", () => {
       const formData = new FormData();
       formData.append("file", blob, fileName);
 
-      const response = await axios.post("http:" + urlPrinting + "/upload", formData, {
+      const response = await axios.post("http:" + urlPrinting + "/api/upload/pdf", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
