@@ -1,10 +1,10 @@
 <script setup lang="ts">
   import { IonApp, IonCol, IonLabel, IonGrid, IonRow, IonButton, IonContent, IonInput, IonTextarea } from '@ionic/vue';
-  import { ref, type Ref} from "vue";
+  import { ref, type Ref, watch} from "vue";
   import { storeToRefs } from 'pinia';
 
   import { useScaleStore } from "@/stores/scale";
-  const { weightFromScale, infoFromScale } = storeToRefs(useScaleStore());
+  const { weightFromScale, infoFromScale, isScaleConnected, scErrorCode } = storeToRefs(useScaleStore());
 
   import { usePrintingStore } from '@/stores/printing';
   const { saveAsPDF } = usePrintingStore();
@@ -20,7 +20,7 @@
   const urlPrinting: Ref<string> = ref('localhost:3000');
 
   function startScaleConnection() {
-    connectToScaleConnector(url.value);
+    connectToScaleConnector(url.value, scaleName.value, scaleConfig.value);
   }
 
   function stopScaleConnection() {
@@ -28,9 +28,9 @@
     disconnectFromScaleConnector();
   }
 
-  function sendConfig() {
-    sendConfigToScaleConnector(scaleName.value, scaleConfig.value);
-  }
+  // function sendConfig() {
+  //   sendConfigToScaleConnector(scaleName.value, scaleConfig.value);
+  // }
 
   function getWeightFromScale() {
     console.log('call scaleWeight');
@@ -63,6 +63,18 @@
     }
   }
 
+    watch(scErrorCode, (newValue) => {
+    if (newValue) {
+      scErrorCode.value = ''; 
+      infoFromScale.value += '\n(scErrorCode reseted, stop interval, disconnect from scale)\n'; 
+    
+      if (!isScaleConnected.value) {
+        stopGettingWeightInterval();
+        disconnectFromScaleConnector();
+      }
+    }
+  });
+
   function sendPDF() {
     const popoverContent = document.getElementById('printContent')!.outerHTML;
     const fileName = 'Test.pdf';
@@ -92,10 +104,6 @@
               <ion-col>
                 <ion-input label="Scale Connector URL (IP:port)" v-model="url" label-placement="stacked" fill="outline"></ion-input>
               </ion-col>
-              <ion-col>
-                <ion-button @click="startScaleConnection">Connect</ion-button>
-                <ion-button @click="stopScaleConnection">Stop</ion-button>
-              </ion-col>
             </ion-row>
             <ion-row class="full-height">
               <ion-col  size="2">
@@ -105,7 +113,13 @@
                 <ion-input label="Scale Config" v-model="scaleConfig" label-placement="stacked" fill="outline"></ion-input>
               </ion-col>
               <ion-col>
-                <ion-button @click="sendConfig">Send Config</ion-button>
+                <!-- <ion-button @click="sendConfig">Send Config</ion-button> -->
+              </ion-col>
+            </ion-row>
+            <ion-row class="full-height">
+              <ion-col>
+                <ion-button @click="startScaleConnection">Connect</ion-button>
+                <ion-button @click="stopScaleConnection">Stop</ion-button>
               </ion-col>
             </ion-row>
             <br/><hr/>
@@ -153,7 +167,13 @@
             <ion-row class="full-height">
             </ion-row>
           </ion-col>
+          
           <ion-col size="6" style="max-width: 600px;">
+            <ion-row class="full-height">
+              <ion-col size="2">
+                <ion-button @click="infoFromScale=''">Clear</ion-button>
+              </ion-col>
+            </ion-row>
             <ion-row class="full-height">
               <ion-col>
                 <ion-textarea label="Status:" v-model="infoFromScale" label-placement="stacked" fill="outline" style="min-height: 80vh"></ion-textarea>
@@ -186,7 +206,7 @@
  
   .main-appcontent {
     height: 100vh;
-    width: 80%;
+    /* width: 80%; */
   }
 
   ion-row {
