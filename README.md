@@ -29,7 +29,7 @@ npm run dev
 ### Type-Check, Compile and Minify for Production
 
 ```sh
-npm run build npm run deploy
+npm run build
 ```
 
 ### Update the github page
